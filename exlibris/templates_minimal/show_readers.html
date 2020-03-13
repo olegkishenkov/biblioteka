@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Readers</title>
+     {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}"/>
+</head>
+<body>
+<table class="table table-striped table-bordered table-sm">
+    <thead class="thead-dark">
+    <tr>
+        <th>Id</th>
+        <th>Name</th>
+    </tr>
+    </thead>
+    <tbody>
+{% for reader in readers %}
+    <tr>
+        <td>{{ reader.id }}</td>
+        <td>
+            <a href="show_lends_by_reader/{{ reader.id }}">
+                <span class="glyphicon glyphicon-pencil" >{{ reader.name }}</span>
+            </a>
+        </td>
+    </tr>
+{% endfor %}
+    </tbody>
+</table>
+<br>
+</body>
+</html>

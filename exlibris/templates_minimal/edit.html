@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Index</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}"/>
+</head>
+<body>
+<form method="POST" class="post-form" action="{% url "update_book" book.id %}">
+        {% csrf_token %}
+    <div class="container">
+<br>
+    <div class="form-group row">
+    <label class="col-sm-1 col-form-label"></label>
+    <div class="col-sm-4">
+    <h3>Update Book</h3>
+    </div>
+  </div>
+    <div class="form-group row">
+    <label class="col-sm-2 col-form-label">Id:</label>
+    <div class="col-sm-4">
+        <input type="text" name="eid" id="id_eid" required maxlength="20" value="{{ book.id }}"/>
+    </div>
+  </div>
+  <div class="form-group row">
+    <label class="col-sm-2 col-form-label">Title:</label>
+    <div class="col-sm-4">
+        <input type="text" name="title" id="id_title" required maxlength="100" value="{{ book.title }}" />
+    </div>
+  </div>
+    <div class="form-group row">
+    <label class="col-sm-2 col-form-label">Author:</label>
+    <div class="col-sm-4">
+        <select name="author" required id="id_author">
+            {% for author in authors %}
+                <option value="{{ author.id }}" {% if author == current_author %}selected{% endif %}>{{ author }}</option>
+            {% endfor %}
+        </select>
+        <input type="text" name="year" id="id_year" required maxlength="255" value="{{ book.year|date:"Y-m-d" }}" />
+    </div>
+  </div>
+    <div class="form-group row">
+    <label class="col-sm-1 col-form-label">Year</label>
+    <div class="col-sm-4">
+    <button type="submit" class="btn btn-success">Update</button>
+    </div>
+  </div>
+    </div>
+</form>
+</body>
+</html>

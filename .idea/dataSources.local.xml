@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="dataSourceStorageLocal">
+    <data-source name="db" uuid="ae719def-b679-4392-b8ea-372532851342">
+      <database-info product="" version="" jdbc-version="" driver-name="" driver-version="" dbms="SQLITE" exact-version="0" />
+      <auth-required>false</auth-required>
+      <schema-mapping />
+    </data-source>
+    <data-source name="db.sqlite3" uuid="28642132-3ad0-4a6a-b8f3-571b65d2af11">
+      <database-info product="SQLite" version="3.25.1" jdbc-version="2.1" driver-name="SQLite JDBC" driver-version="3.25.1" dbms="SQLITE" exact-version="3.25.1" exact-driver-version="3.25">
+        <identifier-quote-string>&quot;</identifier-quote-string>
+      </database-info>
+      <case-sensitivity plain-identifiers="mixed" quoted-identifiers="mixed" />
+      <secret-storage>master_key</secret-storage>
+      <auth-required>false</auth-required>
+      <schema-mapping>
+        <introspection-scope>
+          <node kind="schema" negative="1" />
+        </introspection-scope>
+      </schema-mapping>
+    </data-source>
+  </component>
+</project>

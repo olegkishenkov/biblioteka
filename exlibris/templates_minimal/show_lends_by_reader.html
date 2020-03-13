@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Lends by {{ reader }}</title>
+     {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}"/>
+</head>
+<body>
+<h3>Lends by reader {{ reader }}</h3>
+<table class="table table-striped table-bordered table-sm">
+    <thead class="thead-dark">
+    <tr>
+        <th>Id</th>
+        <th>Book</th>
+        <th>Starts</th>
+        <th>Ends</th>
+    </tr>
+    </thead>
+    <tbody>
+{% for lend in lends %}
+    <tr>
+        <td>{{ lend.id }}</td>
+        <td>{{ lend.book.title }}</td>
+        <td>{{ lend.date_start }}</td>
+        <td>{{ lend.date_end }}</td>
+    </tr>
+{% endfor %}
+    </tbody>
+</table>
+<br>
+</body>
+</html>
