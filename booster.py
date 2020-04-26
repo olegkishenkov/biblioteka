@@ -8,7 +8,7 @@ from asgiref.sync import async_to_sync
 from bs4 import BeautifulSoup
 from channels.layers import get_channel_layer
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'biblioteka.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'biblioteka.settings.base')
 channel_layer = get_channel_layer()
 
 while True:
