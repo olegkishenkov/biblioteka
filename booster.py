@@ -20,11 +20,12 @@ books = soup.findAll('div', class_='blist-biglist')[0].contents
 books_string = '; '.join((book.findAll('div', class_='brow-topno')[0].contents[0] +
                       ' ' +
                       book.findAll('a', class_='brow-book-name')[0].string for book in books[:5]))
+datetime_string = datetime.now().ctime()
 
 async_to_sync(channel_layer.group_send)(
     'chat_default',
     {
         'type': 'chat_message',
-        'message': '{} {}'.format(datetime.now().ctime(), books_string),
+        'message': '{} {}'.format(datetime_string, books_string),
     },
 )
