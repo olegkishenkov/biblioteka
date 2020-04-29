@@ -12,8 +12,8 @@ from .forms import BookForm
 class BookList(ListView):
     model = Book
 
-    def get_queryset(self):
-        return self.model.objects.filter(title__startswith='Harry')
+    # def get_queryset(self):
+    #     return self.model.objects.filter(title__startswith='Harry')
 
 
 class BookView(DetailView):
@@ -21,7 +21,7 @@ class BookView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['test'] = self.request.META['HTTP_USER_AGENT']
+        #context['test'] = self.request.META['HTTP_USER_AGENT']
 
         return context
 
