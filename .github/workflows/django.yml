@@ -26,4 +26,5 @@ jobs:
         python manage.py test
     - name: Run asyncio pytests
       run: |
+        docker run -p 6379:6379 -d redis:5
         pytest --ds=biblioteka.settings.local
