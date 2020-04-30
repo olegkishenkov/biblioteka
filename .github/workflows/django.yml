@@ -24,3 +24,6 @@ jobs:
     - name: Run Tests
       run: |
         python manage.py test
+    - name: Run asyncio pytests
+      run: |
+        pytest --ds=biblioteka.settings.local
