@@ -82,12 +82,13 @@ pip install -r requirements.txt
 pip install -U psycopg2
 deactivate
 ```
-Don't forget to add the venv directory PYthon bytecode files and .gitignore itself to the list of untracked files by Git:
+Don't forget to add the venv directory, Python bytecode files, the credentials file .env and .gitignore itself to the list of untracked files by Git:
 ``` sh
 # /home/ec2-user/biblioteka/.gitignore
 *.pyc
 env
 .gitignore
+.env
 ```
 
 Since in biblioteka credentials are separated from config files (see below) you sould make those credentials accessible as environment variables. That's why we need to tweak the venv activation script:
