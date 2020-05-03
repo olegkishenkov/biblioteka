@@ -24,7 +24,17 @@ A simple Django-based website where Web Sockets requests are processed parallely
 Amazon Linux 2 comes with Python 3 version other that 3.8.2, so we'll have to install Python 3.8 from sources. First we'll install package dependencies:
 ```
 sudo yum groupinstall "Development Tools"
-sudo yum install openssl-devel bzip2-devel libffi-devel bzip2-devel libdhash-devel tk-devel gdbm-devel xz-devel uuid-devel libuuid-devel sqlite-devel
+sudo yum install openssl-devel \
+bzip2-devel \
+libffi-devel \
+bzip2-devel \
+libdhash-devel \
+tk-devel \
+gdbm-devel \
+xz-devel \
+uuid-devel \
+libuuid-devel \
+sqlite-devel
 ```
 
 Since Python 3.8.2 needs the latest release of Sqlite, we'll install Sqlite 3.31.1 from sources:
@@ -37,6 +47,7 @@ mkdir /home/ec2-user/stage
 ./configure --prefix /home/ec2-user/stage
 make -s
 make install
+cd /home/ec2-user/biblioteka && rm sqlite-autoconf-3310100.tar.gz
 ```
 ##### Python
 Now using the environment variable LD_RUN_PATH to tell the linker to add the path to Sqlite 3.31.1 in the executable let's compile Python 3.8.2:
@@ -48,6 +59,7 @@ cd Python-3.8.2
 LD_RUN_PATH=/home/ec2-user/stage/lib ./configure --enable-optimizations --prefix=/home/ec2-user/stage
 LD_RUN_PATH=/home/ec2-user/stage/lib make -s
 LD_RUN_PATH=/home/ec2-user/stage/lib make altinstall
+cd /home/ec2-user/biblioteka && rm Python-3.8.2.tgz
 ```
 
 Check the versions:
@@ -58,16 +70,51 @@ Python 3.8.2
 3.31.1
 ```
 
-After that let's download the repo and create and activate a virtual environment with Pyhton's venv module and upgrage Python's package manager pip:
+After that let's download the repo and create and activate a virtual environment with Pyhton's venv module, upgrage Python's package manager pip and install necessary Python packages:
 ``` sh
 cd /home/ec2-user
-https://github.com/oleg1248/biblioteka biblioteka
+git clone https://github.com/oleg1248/biblioteka biblioteka
 cd biblioteka
 /home/ec2-user/stage/bin/python3.8 -m venv env
 source env/bin/activate
 pip install --upgrade pip
+pip install -r requirements.txt
+pip install -U psycopg2
 deactivate
 ```
+Don't forget to add the venv directory PYthon bytecode files and .gitignore itself to the list of untracked files by Git:
+``` sh
+# /home/ec2-user/biblioteka/.gitignore
+*.pyc
+env
+.gitignore
+```
+
+Since in biblioteka credentials are separated from config files (see below) you sould make those credentials accessible as environment variables. That's why we need to tweak the venv activation script:
+``` sh
+# /home/ec2-user/biblioteka/env/bin/activate
+deactivate() {
+...
+    # Unset credential environmet variables
+    unset POSTGRESQL_USER
+    unset POSTGRESQL_PASSWORD
+    unset POSTGRESQL_HOST
+    unset POSTGRESQL_PORT
+    unset HTTPS_PROXY
+...
+}
+...
+# Set credential environmet variables
+    source /home/ec2-user/biblioteka/.env
+    export POSTGRESQL_USER
+    export POSTGRESQL_PASSWORD
+    export POSTGRESQL_HOST
+    export POSTGRESQL_PORT
+    export HTTPS_PROXY
+...
+```
+As you can see the credentials are stored in the file .env, which is first and foremost picked up by Django with the dotenv module. In fact, exporting those environment variables upon venv activation is necessary only if you plan to use the scraper booster.py with a forward proxy. If you don't, just skip this step.
+
 ##### Nginx
 Now let's install and configure nginx as a reverse proxy:
 ``` sh
@@ -75,7 +122,7 @@ sudo yum install nginx
 sudo amazon-linux-extras install
 sudo mkdir /etc/nginx/{sites-available,sites-enabled}
 sudo touch /etc/nginx/sites-available/biblioteka.conf
-ln -s /etc/nginx/sites-available/biblioteka.conf /enc/nginx/sites-enabled/biblioteka.conf
+ln -s /etc/nginx/sites-available/biblioteka.conf /etc/nginx/sites-enabled/biblioteka.conf
 ```
 ``` sh
 # /etc/nginx/sites-available/biblioteka.conf
@@ -98,12 +145,23 @@ server {
     root /var/www/biblioteka
     }
 }
-```
 
-In order for nginx to use the recently created configuraton file an include directive should be added to the nginx.conf's http block directive and the regular directive 'server' sould be commented out. 
+In order for nginx to use the recently created configuration file an include directive should be added to the nginx.conf's http block directive and the block directive 'server' sould be commented out. 
 ``` sh
 include /etc/nginx/sites-enabled/*;
+# server {
+...
 ```
+
+You should also make sure that there is an inbound firewall rule for your EC2 Instance that allows all trafic on all ports from any source.
+```
+| Type          | Protocol           | Port range  | Source       |
+|:--------------|:------------------:|:-----------:|-------------:|
+| All traffic   | All                | All         | 0.0.0.0/0    |
+| All traffic   | All                | All         | ::/0         |
+| SSH           | TCP                | 22          | 0.0.0.0/0    |
+```
+
 ##### uWSGI
 The next step is to install and configure uWSGI:
 ``` sh
@@ -160,6 +218,7 @@ ExecStart=/home/ec2-user/biblioteka/env/bin/daphne -p 8001 biblioteka.asgi:appli
 [Install]
 WantedBy=multi-user.target
 ```
+
 ##### Starting and Debugging
 As the congig files are ready it's time to restart nginx, uwsgi and daphne
 ``` sh
@@ -176,8 +235,8 @@ sudo systemctl status daphne
 If debugging is necessary you'll find logs at:
 ``` sh
 sudo tail -Fn 5 /var/log/nginx/{access,error}.log
-journalctl -u uwsgi
-journalctl -u daphne
+journalctl -xefu uwsgi
+journalctl -xefu daphne
 ```
 nginx config file syntax may be checked with
 ``` sh
@@ -185,9 +244,54 @@ sudo nginx -t
 ```
 In order to run uwsgi and daphne directly with their settings passed as command line arguments instead of using an init system and config files do
 ``` sh
-/home/ec2-user/biblioteka/env/bin/uwsgi --socket 127.0.0.1:3031 --chdir /home/ec2-user/biblioteka --wsgi-file /home/ec2-user/biblioteka/biblioteka/wsgi.py --master --processes 4 --threads 2 --stats 127.0.0.1:9191
+/home/ec2-user/biblioteka/env/bin/uwsgi \
+--socket 127.0.0.1:3031 \
+--chdir /home/ec2-user/biblioteka \
+--wsgi-file /home/ec2-user/biblioteka/biblioteka/wsgi.py \
+--master \
+--processes 4 \
+--threads 2 \
+--stats 127.0.0.1:9191
 /home/ec2-user/biblioteka/env/bin/daphne -p 8001 biblioteka.asgi:application
 ```
+If you edit config files reload them with
+``` sh
+sudo systemctl daemon-reload
+```
+If you edit Django application files restart the servers with
+``` sh
+sudo systemctl restart uwsgi
+sudo systemctl restart daphne
+```
+The error messages of Django may be directed to uWSGI logs by adding a directive to its config:
+``` sh
+# /etc/uwsgi/biblioteka.ini
+log-master=true
+```
+It is also possible to direct Django error messages to the systemd journal. It may be done with the help of Python logging and systemd modules. If logging is a part of the Python Standard Library, systemd is not, so first you should install the systemd package.
+``` sh
+sudo yum install systemd-devel
+cd /home/ec2-user/biblioteka
+source env/bin/activate
+pip install -U systemd
+```
+Error messages sent by loggers will appear in the systemd journal if a handler is passed to the logger in, say, the settings file production.py.
+``` python
+# /home/ec2-user/biblioteka/settings/production.py
+...
+import logging
+from systemd import journal
+
+logger = logging.getLogger()
+journalHandler = journal.JournaldLogHandler()
+logger.addHandler(journalHandler)
+
+logger.error('hello world, I\'m a error message')
+```
+``` sh
+journalctl -xe
+```
+
 ##### Redis
 In order to properly store channel layers we will use redis in a docker container, so let's install docker and run redis:
 ``` sh
@@ -199,10 +303,25 @@ docker run -p 6379:6379 -d redis:5
 ```
 
 ##### PostgreSQL
-Specify your PostgreSQL credentials in /home/ec2-user/biblioteka/biblioteka/settings/production.py
+Now it's time to launch an Amazon RDS PostgreSQL instance and write down its credentials. Specify those credentials in a file at your production server so that they could be loaded by uWSGI:
+``` sh
+touch /home/ec2-user/biblioteka/credentials
+```
+``` sh
+POSTGRESQL_USER=postgres
+POSTGRESQL_PASSWORD=<YOUR_POSTGRESQL_PASSWORD>
+POSTGRESQL_HOST=<YOUR_POSTGRESQL_HOST>
+POSTGRESQL_PORT=5432
+```
+Those credentials will be picked up by Django automatically.
 
 ##### Scraper
-There's no need to make a preliminary setup for the scraper at this time.
+If you want to use the scraper booster.py with a forward proxy, add a line with your proxy data to credentials:
+``` sh
+# /home/ec2-user/biblioteka/credentials
+...
+HTTPS_PROXY=https://<USERNAME>:<PASSWORD>@<HOST>:3128
+```
 
 ### Usage
 Let's create a job to run the scraper booster.py every minute with crontab:
@@ -211,13 +330,13 @@ EDITOR=nano crontab -e
 ```
 ``` sh
 # crontab
-* * * * * cd /home/ec2-user/biblioteka && env/bin/python booster.py -Proxy https://demooleg:test123@35.228.187.187:3128 >> ~/cron.log 2>&1
+* * * * * cd /home/ec2-user/biblioteka && env/bin/python booster.py >> ~/cron.log 2>&1
 ```
 Now go to your public IP address with your browser
 ``` sh
-http://<your-public-ip>/exlibris
+http://<YOUR_PUBLIC_IP>/exlibris
 ```
-You may watch the cron's log at
+You will see messages from the scraper comming every minute. You may watch the cron's log at
 ``` sh
 sudo tail -F /var/log/cron
 ```
