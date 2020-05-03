@@ -306,7 +306,7 @@ docker run -p 6379:6379 -d redis:5
 ##### PostgreSQL
 Now it's time to launch an Amazon RDS PostgreSQL instance and write down its credentials. Specify those credentials in a file at your production server so that they could be loaded by uWSGI:
 ``` sh
-touch /home/ec2-user/biblioteka/credentials
+touch /home/ec2-user/biblioteka/.env
 ```
 ``` sh
 POSTGRESQL_USER=postgres
@@ -314,12 +314,12 @@ POSTGRESQL_PASSWORD=<YOUR_POSTGRESQL_PASSWORD>
 POSTGRESQL_HOST=<YOUR_POSTGRESQL_HOST>
 POSTGRESQL_PORT=5432
 ```
-Those credentials will be picked up by Django automatically.
+Those credentials will be picked up by Django with the help of the dotenv module.
 
 ##### Scraper
 If you want to use the scraper booster.py with a forward proxy, add a line with your proxy data to credentials:
 ``` sh
-# /home/ec2-user/biblioteka/credentials
+# /home/ec2-user/biblioteka/.env
 ...
 HTTPS_PROXY=https://<USERNAME>:<PASSWORD>@<HOST>:3128
 ```
