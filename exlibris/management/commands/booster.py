@@ -14,7 +14,7 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        response = requests.get('https://www.livelib.ru/books/top'git )
+        response = requests.get('https://www.livelib.ru/books/top')
         response.encoding = 'utf-8'
         html = response.text
 
