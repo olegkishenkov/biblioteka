@@ -44,3 +44,12 @@ class Lend(models.Model):
 
     def __str__(self):
         return (str(self.book) + " -> " + str(self.reader))
+
+class Rating(models.Model):
+    name = models.CharField(max_length=255)
+    books = models.ManyToManyField(to=Book, through='Entry')
+
+class Entry(models.Model):
+    book = models.ForeignKey(Book, on_delete=models.CASCADE)
+    rating = models.ForeignKey(Rating, on_delete=models.CASCADE)
+    date = models.DateTimeField()
