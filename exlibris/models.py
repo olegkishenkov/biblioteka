@@ -58,3 +58,6 @@ class Entry(models.Model):
     rating = models.ForeignKey(Rating, on_delete=models.CASCADE)
     date = models.DateTimeField()
     rank = models.IntegerField()
+
+    def __str__(self):
+        return str(self.rank)
