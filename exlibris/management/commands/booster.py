@@ -20,8 +20,14 @@ class Command(BaseCommand):
         parser.add_argument(
             '--no-db-input',
             '-d',
-            action='store_true',
-            help='do not write parsed data to the database'
+            action = 'store_true',
+            help = 'do not write parsed data to the database'
+        )
+        parser.add_argument(
+            '--no-message',
+            '-m',
+            action = 'store_true',
+            help = 'do not send a message to the channel layer'
         )
 
     def handle(self, *args, **options):
@@ -50,11 +56,11 @@ class Command(BaseCommand):
                 year_string = details_string.findAll(
                     lambda _: (_.name=='tr') and (_.text.find('Год издания')>-1)
                 )[0].td.nextSibling.text
-                author = Author.objects.create(name=author_string)
+                author, created = Author.objects.get_or_create(name=author_string)
                 author.save()
-                book_ = Book.objects.create(title=title_string, year=year_string+'-01-01', author=author)
+                book_, created = Book.objects.get_or_create(title=title_string, year=year_string+'-01-01', author=author)
                 book_.save()
-                rating = Rating.objects.filter(name='Livelib Top 100')[0]
+                rating = Rating.objects.get(name='Livelib Top 100')
                 entry = Entry.objects.create(
                     rating=rating,
                     book=book_,
@@ -63,11 +69,12 @@ class Command(BaseCommand):
                 )
                 entry.save()
 
-        channel_layer = get_channel_layer()
-        async_to_sync(channel_layer.group_send)(
-            'chat_default',
-            {
-                'type': 'chat_message',
-                'message': '{}\n{}'.format(datetime_string, books_string),
-            },
-        )
+        if not options['no_message']:
+            channel_layer = get_channel_layer()
+            async_to_sync(channel_layer.group_send)(
+                'chat_default',
+                {
+                    'type': 'chat_message',
+                    'message': '{}\n{}'.format(datetime_string, books_string),
+                },
+            )
