@@ -55,9 +55,13 @@ class Command(BaseCommand):
                 book_ = Book.objects.create(title=title_string, year=year_string+'-01-01', author=author)
                 book_.save()
                 rating = Rating.objects.filter(name='Livelib Top 100')[0]
-                entry = Entry.objects.create(rating=rating, book=book_, date=datetime_string)
+                entry = Entry.objects.create(
+                    rating=rating,
+                    book=book_,
+                    date=datetime_string,
+                    rank=rank_string.lstrip('№'),
+                )
                 entry.save()
-
 
         channel_layer = get_channel_layer()
         async_to_sync(channel_layer.group_send)(

@@ -53,3 +53,4 @@ class Entry(models.Model):
     book = models.ForeignKey(Book, on_delete=models.CASCADE)
     rating = models.ForeignKey(Rating, on_delete=models.CASCADE)
     date = models.DateTimeField()
+    rank = models.IntegerField()
