@@ -24,8 +24,12 @@ class Book(models.Model):
     year = models.DateField("date published")
     author = models.ForeignKey(Author, related_name="books", on_delete=models.CASCADE)
 
+    class Meta:
+        unique_together = [('title', 'year', 'author'), ]
+
     def __str__(self):
         return self.title
+
 
 
 class Reader(models.Model):
@@ -44,3 +48,16 @@ class Lend(models.Model):
 
     def __str__(self):
         return (str(self.book) + " -> " + str(self.reader))
+
+class Rating(models.Model):
+    name = models.CharField(max_length=255)
+    books = models.ManyToManyField(to=Book, through='Entry')
+
+class Entry(models.Model):
+    book = models.ForeignKey(Book, on_delete=models.CASCADE)
+    rating = models.ForeignKey(Rating, on_delete=models.CASCADE)
+    date = models.DateTimeField()
+    rank = models.IntegerField()
+
+    def __str__(self):
+        return str(self.rank)
