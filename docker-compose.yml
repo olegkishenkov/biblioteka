@@ -3,9 +3,37 @@ version: '3'
 services:
   web:
     build: .
-    command: bash -c "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
-    container_name: biblioteka
+    environment:
+      DJANGO_SUPERUSER_USERNAME: demooleg
+      DJANGO_SUPERUSER_PASSWORD: test123
+      DJANGO_SUPERUSER_EMAIL: demooleg@example.com
+    command: >
+        bash -c "python manage.py createsuperuser --no-input
+        ; python manage.py makemigrations
+        && python manage.py migrate
+        && python manage.py runserver 0.0.0.0:8000"
     volumes:
       - .:/biblioteka
     ports:
-      - "8000:8000"
+      - 8000:8000
+    networks:
+      - main
+    depends_on:
+      - db
+      - queue
+  db:
+    image:
+      postgres
+    environment:
+      POSTGRES_PASSWORD: test123
+    ports:
+      - 5432:5432
+    networks:
+      - main
+  queue:
+    image:
+      redis
+    networks:
+      - main
+networks:
+  main:
