@@ -84,7 +84,6 @@ class Command(BaseCommand):
                         'year': year_string,
                     }
                 )
-            datetime_string = timezone.now()
             books_dict = {'moment': timezone.now(), 'books': books_list, 'rating': 'livelib'}
             books_outer_list.append(books_dict)
 
@@ -93,6 +92,8 @@ class Command(BaseCommand):
 
         if not options['no_db_input']:
             for _ in books_outer_list:
+                rating = _['rating']
+                moment = _['moment']
                 for book in _['books']:
                     author, created = Author.objects.get_or_create(name=book['author'])
                     author.save()
@@ -102,11 +103,16 @@ class Command(BaseCommand):
                         author=author
                     )
                     book_.save()
-                    rating = Rating.objects.get(name='Livelib Top 100')
+                    if rating == 'livelib':
+                        rating_ = Rating.objects.get(name='Livelib Top 100')
+                    elif rating == 'readrate':
+                        rating_ = Rating.objects.get(name='Readrate 100 лучших книг')
+                    else:
+                        raise NotImplementedError('the rating {} is not implemented'.format(rating))
                     entry = Entry.objects.create(
-                        rating=rating,
+                        rating=rating_,
                         book=book_,
-                        date=datetime_string,
+                        date=moment,
                         rank=book['rank'].lstrip('№'),
                     )
                     entry.save()

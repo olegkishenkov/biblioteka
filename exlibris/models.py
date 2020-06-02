@@ -34,7 +34,7 @@ class Book(models.Model):
 
 class Reader(models.Model):
     name = models.CharField(max_length=255)
-    books = models.ManyToManyField(Book, through='Lend')
+    books = models.ManyToManyField(Book, through='Lend', related_name='reader')
 
     def __str__(self):
         return self.name
@@ -46,8 +46,8 @@ class Lend(models.Model):
     date_start = models.DateField()
     date_end = models.DateField()
 
-    def __str__(self):
-        return (str(self.book) + " -> " + str(self.reader))
+    # def __str__(self):
+    #     return (str(self.book) + " -> " + str(self.reader))
 
 class Rating(models.Model):
     name = models.CharField(max_length=255)
