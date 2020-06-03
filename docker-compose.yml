@@ -1,0 +1,74 @@
+version: '3'
+
+services:
+  web:
+    build: .
+    environment:
+      DJANGO_SUPERUSER_USERNAME: demooleg
+      DJANGO_SUPERUSER_PASSWORD: test123
+      DJANGO_SUPERUSER_EMAIL: demooleg@example.com
+      GUNICORN_CMD_ARGS: >
+        --bind 0.0.0.0:8020
+        --workers 3
+        --access-logfile -
+        --log-level info
+        --logger-class biblioteka.utils.LoggerPrefix
+        --access-logformat '%(h)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%({host}i)s" "%({x-forwarded-for}i)s"'
+    command: >-
+      bash -c 'python manage.py createsuperuser --no-input
+      ; python manage.py makemigrations
+      && python manage.py migrate
+      && gunicorn biblioteka.wsgi:application
+      & daphne biblioteka.asgi:application --bind 0.0.0.0 --port 8010 --verbosity 2 --access-log -'
+    volumes:
+      - .:/biblioteka
+    expose:
+      - 8010
+      - 8020
+    networks:
+      - main
+    depends_on:
+      - db
+      - queue
+  db:
+    image:
+      postgres
+    environment:
+      POSTGRES_PASSWORD: test123
+#    expose:
+#      - 5432
+    ports:
+      - 5432:5432
+    networks:
+      - main
+  queue:
+    image:
+      redis
+    expose:
+      - 6379
+    networks:
+      - main
+  reverse_proxy:
+    build:
+      context: .
+      dockerfile:
+        Dockerfile-reverse_proxy
+    ports:
+      - 8030:80
+    networks:
+      - main
+    depends_on:
+      - web
+    command: nginx -g "daemon off; error_log /dev/stdout debug;"
+#  db_frontend:
+#    image:
+#      dpage/pgadmin4
+#    ports:
+#      - 8005:80
+#    environment:
+#      PGADMIN_DEFAULT_EMAIL: 'demooleg@example.com'
+#      PGADMIN_DEFAULT_PASSWORD: 'test123'
+#    networks:
+#      - main
+networks:
+  main:
