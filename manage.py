@@ -5,10 +5,10 @@ import sys
 
 from dotenv import load_dotenv
 
-load_dotenv()
 
 def main():
-    # os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'biblioteka.settings.local')
+    load_dotenv()
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'biblioteka.settings.local_django_development_server')
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
