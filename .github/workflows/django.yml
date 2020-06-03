@@ -13,7 +13,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Set up Python 3.8.2
+    - name: Set up Python 3.8
       uses: actions/setup-python@v1
       with:
         python-version: '3.8'
@@ -27,7 +27,7 @@ jobs:
     - name: Run asyncio pytests
       run: |
         docker run -p 6379:6379 -d redis:5
-        pytest --ds=biblioteka.settings.local
+        pytest --ds=biblioteka.settings.local_django_development_server
     - name: Deploy to Dockerhub
       run: |
         echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin
