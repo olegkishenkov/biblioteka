@@ -7,15 +7,23 @@ services:
       DJANGO_SUPERUSER_USERNAME: demooleg
       DJANGO_SUPERUSER_PASSWORD: test123
       DJANGO_SUPERUSER_EMAIL: demooleg@example.com
-    command: >
-        bash -c "python manage.py createsuperuser --no-input
+    command: >-
+        bash -c 'python manage.py createsuperuser --no-input
         ; python manage.py makemigrations
         && python manage.py migrate
-        && python manage.py runserver 0.0.0.0:8000"
+        && gunicorn biblioteka.wsgi
+        --bind 0.0.0.0:8020
+        --workers 3
+        --access-logfile -
+        --access-logformat '\''%(h)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s"
+        "%({host}i)s" "%({x-forwarded-for}i)s"'\''
+        & daphne biblioteka.asgi:application --bind 0.0.0.0 --port 8010'
+#        && python manage.py runserver 0.0.0.0:8000"
     volumes:
       - .:/biblioteka
-    ports:
-      - 8000:8000
+    expose:
+      - 8010
+      - 8020
     networks:
       - main
     depends_on:
@@ -35,5 +43,16 @@ services:
       redis
     networks:
       - main
+  reverse_proxy:
+    build:
+      context: .
+      dockerfile:
+        Dockerfile-reverse_proxy
+    ports:
+      - 8030:80
+    networks:
+      - main
+    depends_on:
+      - web
 networks:
   main:
