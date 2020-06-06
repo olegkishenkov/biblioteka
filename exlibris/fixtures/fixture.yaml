@@ -1,0 +1,8 @@
+- model: exlibris.rating
+  pk: 1
+  fields:
+    name: Livelib Top 100
+- model: exlibris.rating
+  pk: 2
+  fields:
+    name: Readrate 100 лучших книг
