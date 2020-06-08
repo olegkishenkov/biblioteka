@@ -37,6 +37,6 @@ jobs:
         docker build --file Dockerfile-reverse_proxy --tag ${DOCKER_USERNAME}/biblioteka_reverse_proxy:${TIMESTAMP} .
         docker push ${DOCKER_USERNAME}/biblioteka_reverse_proxy:${TIMESTAMP}
       env:
-        DOCKER_USERNAME: olegkishenkov
-        DOCKER_PASSWORD: Apriil_Mh10
+        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
 
