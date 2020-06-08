@@ -4,16 +4,10 @@ services:
   web:
     build: .
     environment:
-      DJANGO_SUPERUSER_USERNAME: demooleg
-      DJANGO_SUPERUSER_PASSWORD: test123
-      DJANGO_SUPERUSER_EMAIL: demooleg@example.com
-      GUNICORN_CMD_ARGS: >
-        --bind 0.0.0.0:8020
-        --workers 3
-        --access-logfile -
-        --log-level info
-        --logger-class biblioteka.utils.LoggerPrefix
-        --access-logformat '%(h)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%({host}i)s" "%({x-forwarded-for}i)s"'
+      DJANGO_SUPERUSER_USERNAME: "${DJANGO_SUPERUSER_USERNAME}"
+      DJANGO_SUPERUSER_PASSWORD: "${DJANGO_SUPERUSER_PASSWORD}"
+      DJANGO_SUPERUSER_EMAIL: "${DJANGO_SUPERUSER_EMAIL}"
+      GUNICORN_CMD_ARGS: "${GUNICORN_CMD_ARGS}"
     command: >-
       bash -c 'python manage.py createsuperuser --no-input
       ; python manage.py makemigrations
@@ -34,7 +28,7 @@ services:
     image:
       postgres
     environment:
-      POSTGRES_PASSWORD: test123
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
 #    expose:
 #      - 5432
     ports:
