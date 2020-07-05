@@ -7,12 +7,18 @@ services:
       DJANGO_SUPERUSER_USERNAME: "${DJANGO_SUPERUSER_USERNAME}"
       DJANGO_SUPERUSER_PASSWORD: "${DJANGO_SUPERUSER_PASSWORD}"
       DJANGO_SUPERUSER_EMAIL: "${DJANGO_SUPERUSER_EMAIL}"
-      GUNICORN_CMD_ARGS: "${GUNICORN_CMD_ARGS}"
     command: >-
       bash -c 'python manage.py createsuperuser --no-input
       ; python manage.py makemigrations
       && python manage.py migrate
       && gunicorn biblioteka.wsgi:application
+      --bind 0.0.0.0:8020
+      --workers 3
+      --access-logfile -
+      --log-level info
+      --logger-class biblioteka.utils.LoggerPrefix
+      --access-logformat '\''%(h)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s"
+      "%({host}i)s" "%({x-forwarded-for}i)s"'\''
       & daphne biblioteka.asgi:application --bind 0.0.0.0 --port 8010 --verbosity 2 --access-log -'
     volumes:
       - .:/biblioteka
