@@ -8,12 +8,14 @@ services:
       DJANGO_SUPERUSER_PASSWORD: "${DJANGO_SUPERUSER_PASSWORD}"
       DJANGO_SUPERUSER_EMAIL: "${DJANGO_SUPERUSER_EMAIL}"
     command: >-
-      bash -c 'python manage.py createsuperuser --no-input
+      bash -c 'cron
+      ; python manage.py createsuperuser --no-input
       ; python manage.py makemigrations
       && python manage.py migrate
       && gunicorn biblioteka.wsgi:application
       --bind 0.0.0.0:8020
       --workers 3
+      --reload
       --access-logfile -
       --log-level info
       --logger-class biblioteka.utils.LoggerPrefix

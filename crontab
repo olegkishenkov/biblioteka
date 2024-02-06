@@ -1,0 +1,2 @@
+# crontab
+* * * * * cd /biblioteka && /usr/local/bin/python manage.py booster --no-db-input --verbose livelib >> cron.log 2>&1
