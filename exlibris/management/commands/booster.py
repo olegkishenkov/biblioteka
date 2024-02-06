@@ -63,19 +63,22 @@ class Command(BaseCommand):
             html = response.text
 
             soup = BeautifulSoup(html, 'html.parser')
-            books = soup.findAll('div', class_='blist-biglist')[0].contents
-            # books_string = '\n'.join((book.findAll('div', class_='brow-topno')[0].contents[0] +
-            #                           ' ' +
-            #                           book.findAll('a', class_='brow-book-name')[0].string for book in books[:100]))
+
+            books = soup.findAll('ul', id='books-more')[0]
+            books = books.findAll('li', class_='book-item__item book-item--full lists__counter')
+
             books_list = []
+            rank = 0
             for book in books:
-                rank_string = book.findAll('div', class_='brow-topno')[0].contents[0].strip('№')
-                title_string = book.findAll('a', class_='brow-book-name')[0].string
-                author_string = book.findAll('a', class_='brow-book-author')[0].string
-                details_string = book.findAll('div', class_='brow-details')[0]
-                year_string = details_string.findAll(
-                    lambda _: (_.name == 'tr') and (_.text.find('Год издания') > -1)
-                )[0].td.nextSibling.text
+                rank += 1
+                rank_string = str(rank)
+                title_string = book.findAll('a', class_='book-item__title')[0].string
+                try:
+                    author_string = book.findAll('a', class_='book-item__author')[0].string
+                except IndexError:
+                    author_string = ''
+                details_string = book.findAll('table', class_='book-item-edition')[0]
+                year_string = details_string.findAll('tr')[1].findAll('td')[1].string
                 books_list.append(
                     {
                         'rank': rank_string,
