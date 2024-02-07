@@ -9,10 +9,10 @@ services:
       DJANGO_SUPERUSER_EMAIL: "${DJANGO_SUPERUSER_EMAIL}"
     command: >-
       bash -c 'cron
-      ; python manage.py createsuperuser --no-input
       ; python manage.py makemigrations
       && python manage.py migrate
-      && gunicorn biblioteka.wsgi:application
+      && python manage.py createsuperuser --no-input
+      ; gunicorn biblioteka.wsgi:application
       --bind 0.0.0.0:8020
       --workers 3
       --reload
@@ -72,5 +72,6 @@ services:
 #      PGADMIN_DEFAULT_PASSWORD: 'test123'
 #    networks:
 #      - main
+
 networks:
   main:
