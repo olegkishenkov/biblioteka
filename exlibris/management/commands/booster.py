@@ -14,10 +14,10 @@ import re
 
 
 class Command(BaseCommand):
-    help = 'parses booklib.ru book top and sends the first 5 books\' names to the channel layer group chat_default'
+    help = 'parses book rating websites (e.g. booklib.ru)  and sends the ratings to the channel layer group chat_default'
 
     def add_arguments(self, parser):
-        parser.add_argument('ratings', nargs='+', help='ratings to parse apart from livelib')
+        parser.add_argument('ratings', nargs='+', help='ratings to parse')
         parser.add_argument('--verbose', '-w', action='store_true', help='print data to stdout')
         parser.add_argument(
             '--no-db-input',
@@ -61,7 +61,6 @@ class Command(BaseCommand):
             response = requests.get('https://www.livelib.ru/books/top')
             response.encoding = 'utf-8'
             html = response.text
-
             soup = BeautifulSoup(html, 'html.parser')
 
             books = soup.findAll('ul', id='books-more')[0]
@@ -87,6 +86,7 @@ class Command(BaseCommand):
                         'year': year_string,
                     }
                 )
+
             books_dict = {'moment': timezone.now(), 'books': books_list, 'rating': 'livelib'}
             books_outer_list.append(books_dict)
 

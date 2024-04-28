@@ -1,0 +1,1 @@
+* * * * * cd /home/oleg/projects/biblioteka/ && /home/oleg/projects/biblioteka/.venv/bin/python3.8 manage.py booster --no-db-input -w livelib >> cron.log 2>&1
