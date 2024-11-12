@@ -77,7 +77,7 @@ class Command(BaseCommand):
                 except IndexError:
                     author_string = ''
                 details_string = book.findAll('table', class_='book-item-edition')[0]
-                year_string = details_string.findAll('tr')[1].findAll('td')[1].string
+                year_string = details_string.findAll('td', string=re.compile(r'^\d\d\d\d$'))[0].string
                 books_list.append(
                     {
                         'rank': rank_string,
