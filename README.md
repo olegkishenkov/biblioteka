@@ -10,7 +10,7 @@ A simple Django-based website where Web Sockets requests are processed parallely
 
 ## Requirements
 - Python 3.8.2
-- Djano 3.0.4
+- Django 3.0.4
 - Django Channels 2.4.0
 - RDBMS such as PostgreSQL
 - Web server application capable of making WSGI calls such as uWSGI
@@ -341,6 +341,3 @@ You will see messages from the scraper comming every minute. You may watch the c
 ``` sh
 sudo tail -F /var/log/cron
 ```
-
-## Developer
-oleg1248 oleg1248163264@gmail.com
